@@ -296,4 +296,6 @@ Please note that, out of these, the `pico2wave` back end only supports the follo
 
 ## License
 
+Copyright 2014 Glutanimate
+
 The script and all other project files are licensed under the [GNU GPLv3](http://www.gnu.de/documents/gpl-3.0.en.html). `simple_google_tts` is not endorsed, certified or otherwise approved in any way by Google™.
