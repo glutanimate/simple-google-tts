@@ -1,0 +1,325 @@
+#!/bin/bash
+
+# NAME:         Simple Google TTS
+# VERSION:      0.1
+# AUTHOR:       (c) 2014 Glutanimate <https://github.com/Glutanimate/>
+# DESCRIPTION:  Wrapper script for Michal Fapso's speak.pl Google TTS script
+# DEPENDENCIES: - wrapper: xsel libttspico0 libttspico-utils libttspico-data libnotify-bin
+#               - speak.pl: libwww-perl libhtml-tree-perl sox libsox-fmt-mp3
+#
+# LICENSE:      GNU GPLv3 (http://www.gnu.de/documents/gpl-3.0.en.html)
+#
+# NOTICE:       THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW. 
+#               EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES 
+#               PROVIDE THE PROGRAM “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR 
+#               IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
+#               AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND 
+#               PERFORMANCE OF THE PROGRAM IS WITH YOU. SHOULD THE PROGRAM PROVE DEFECTIVE,
+#               YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
+#
+#               IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING WILL ANY 
+#               COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS THE PROGRAM AS 
+#               PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, 
+#               INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE 
+#               THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED 
+#               INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF THE 
+#               PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS), EVEN IF SUCH HOLDER OR OTHER 
+#               PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+#               
+# USAGE:        simple_google_tts [-p|-g|-h] languagecode ['strings'|'file.txt']
+#               
+#               please consult the README or the help output (-h) for more information
+
+############# GLOBVAR/PREP ###############
+
+ScriptPath="$(readlink -f "$0")"
+ScriptBase="$(basename "$0")"
+ParentPath="${ScriptPath%/*}"
+speakpl="$ParentPath/speak.pl"
+
+TOP_PID="$$"
+PidFile="/tmp/${0##*/}.pid"
+
+
+############### SETTINGS #################
+
+Player="play"
+
+##############  DIALOGS  #################
+
+Usage="\
+$(basename "$0") [-p|-g|-h] languagecode ['strings'|'file.txt']
+
+    -p:   use offline TTS (pico2wave) instead of Google's TTS system
+    -g:   activate gui notifications (via notify-send)
+    -h:   display this help section
+
+    Selection of valid language codes: en, es, de...
+    Check speak.pl for a list of all valid codes
+
+    Warning: offline TTS only supports en, de, es, fr, it
+
+    If an instance of the script is already running it will be terminated.
+
+    If you don't provide an input string or input file, $(basename "$0")
+    will read from the X selection (current/last highlighted text)\
+"
+
+GuiIcon="orca"
+GuiTitle="Google TTS script"
+
+MsgErrNoSpeakpl="Error: speak.pl not found. Falling back to offline playback."
+MsgErrDeps="Error: missing dependencies. Couldn't find:"
+MsgInfoExistInstance="Aborting synthesis and playback of existing script instance"
+MsgErrNoLang="Error: No language code provided."
+MsgInfoInpXsel="Reading from X selection."
+MsgInfoInpFile="Reading from text file."
+MsgInfoInpString="Reading from string."
+MsgErrInvalidInput="Error: Invalid input (file might not be a text file)."
+MsgInfoConnOff="No internet connection."
+MsgInfoModePico="Using pico2wave for TTS synthesis."
+MsgInfoModeGoogle="Using Google for TTS synthesis."
+MsgErrInvalidLang="Error: Offline TTS via pico2wave only supports the .\
+following languages: en, de, es, fr, it."
+MsgErrInputEmpty="Error: Input empty."
+MsgInfoSynthesize="Synthesizing virtual speech."
+MsgInfoPlayback="Playing synthesized speech"
+MsgInfoSectionEmpty="Skipping empty paragraph"
+MsgInfoDone="All sections processed. Waiting for playback to finish."
+
+############## FUNCTIONS #################
+
+check_deps () {
+    for i in "$@"; do
+      type "$i" > /dev/null 2>&1 
+      if [[ "$?" != "0" ]]; then
+        MissingDeps+=" $i"
+      fi
+    done
+}
+
+check_environment () {
+    if [[ ! -f "$speakpl" && "$OptOffline" != "1" ]]; then
+      notify "$MsgErrNoSpeakpl"
+      OptOffline="1"
+    fi
+    check_deps sox perl
+    if [[ -n "$MissingDeps" ]]; then
+      notify "${MsgErrDeps}${MissingDeps}"
+      exit 1
+    fi
+}
+
+check_existing_instance(){
+  ExistingPID="$(cat "$PidFile" 2> /dev/null)"
+  if [[ -n "$ExistingPID" ]]; then
+    rm "$PidFile"
+    notify "$MsgInfoExistInstance"
+    kill -s TERM "$ExistingPID"
+    wait "$ExistingPID"
+  fi
+}
+
+arg_evaluate_options(){
+    # grab options if present
+    while getopts "gph" Options; do
+      case $Options in
+        g ) OptNotify="1"
+            ;;
+        p ) OptOffline="1"
+            ;;
+        h ) echo "$Usage"
+            exit 0
+            ;;
+       \? ) echo "$Usage"
+            exit 1
+            ;;
+      esac
+    done
+}
+
+arg_check_input(){
+  if [[ $# -eq 0 ]]; then
+    echo "$MsgErrNoLang"
+    echo "$Usage"
+    exit 1
+  elif [[ $# -eq 1 ]]; then
+    echo "$MsgInfoInpXsel"
+    InputMode="xsel"
+  elif [[ $# -eq 2 ]]; then
+    if [[ -f "$2" && -n "$(file --mime-type -b "$2" | grep text)" ]]; then
+      echo "$MsgInfoInpFile"
+      InputMode="file"
+    elif [[ ! -f "$2" ]]; then
+      echo "$MsgInfoInpString"
+      InputMode="string"
+    else
+      echo "$MsgErrInvalidInput"
+      echo "$Usage"
+      exit 1
+    fi
+  fi
+  LangCode="$1"
+  Input="$2"
+}
+
+notify(){
+  echo "$1"
+  if [[ "$OptNotify" = "1" ]]; then
+    notify-send -i "$GuiIcon" "$GuiTitle" "$1"
+  fi
+}
+
+check_connectivity(){
+  if ! ping -q -w 1 -c 1 \
+    "$(ip r | grep default | cut -d ' ' -f 3)" > /dev/null; then
+    echo "$MsgInfoConnOff"
+    OptOffline="1"
+  fi
+}
+
+set_tts_mode(){
+  if [[ "$OptOffline" = "1" ]]; then
+    echo "$MsgInfoModePico"
+    tts_engine="tts_pico"
+    OutFile="out.wav"
+  else
+    echo "$MsgInfoModeGoogle"
+    tts_engine="tts_google"
+    OutFile="out.mp3"
+  fi
+}
+
+set_input_mode(){
+  if [[ "$InputMode" = "xsel" ]]; then
+    InputText="$(xsel)"
+  elif [[ "$InputMode" = "string" ]]; then
+    InputText="$Input"
+  elif [[ "$InputMode" = "file" ]]; then
+    InputText="$(cat "$Input")"
+  fi
+
+  # check if input is empty or only consists of whitespace
+  if [[ -z "${InputText//[[:space:]]/}" ]]; then
+    notify "$MsgErrInputEmpty"
+    exit 1
+  fi
+}
+
+split_into_paragraphs(){
+  # Newlines aren't reliable indicators of paragraph breaks
+  # (e.g.: PDF files where each line ends with a newline).
+  # Instead we look for lines ending with a full stop and divide
+  # our text input into sections based on that
+  
+  InputTextModded="$(echo "$InputText" | \
+    sed 's/\.$/|/g' | sed 's/^\s*$/|/g' | tr '\n' ' ' | tr '|' '\n')"
+
+  #   - first sed command: replace end-of-line full stops with '|' delimiter
+  #   - second sed command: replace empty lines with same delimiter (e.g.
+  #     to separate text headings from text)
+  #   - subsequent tr commands: remove existing newlines; replace delimiter with
+  #     newlines to prepare for readarray
+  # TODO: find a more elegant and secure way to split the text by
+  # multi-character/regex patterns
+
+  # insert trailing newline to allow for short text fragments
+  readarray TextSections < <(echo -e "$InputTextModded\n")
+
+  # subtract one section because of trailing newline
+  Sections="$((${#TextSections[@]} - 1))"
+
+  # TODO: find a more elegant way to handle short inputs
+}
+
+pico_synth(){
+  pico2wave --wave="$OutFile" --lang="$LangCode" "$1"
+}
+
+speakpl_synth(){
+  "$speakpl" "$LangCode" <(echo "$1") "$OutFile" > /dev/null 2>&1
+}
+
+tts_google(){
+  split_into_paragraphs
+  for i in "${!TextSections[@]}"; do
+    if [[ "$i" = "$Sections" ]]; then
+      echo "$MsgInfoDone"
+      [[ -n "$PlayerPID" ]] && wait "$PlayerPID"
+      break
+    else
+      echo "Processing $((i+1)) out of $Sections paragraphs"
+    fi
+    OutFile="out_$i.mp3"
+    SectionText="${TextSections[$i]}"
+    if [[ -n "${SectionText//[[:space:]]/}" ]]; then
+      speakpl_synth "${TextSections[$i]}"
+      [[ -n "$PlayerPID" ]] && wait "$PlayerPID"
+      [[ -f "out_$((i-1)).mp3" ]] && rm "out_$((i-1)).mp3"
+      echo "$MsgInfoPlayback $((i+1))"
+      $Player "$OutFile" > /dev/null 2>&1 &
+      PlayerPID="$!"
+    else
+      echo "$MsgInfoSectionEmpty"
+      continue
+    fi
+  done
+}
+
+tts_pico(){
+  if [[ "$LangCode" = "en" ]]; then
+    LangCode="en-GB"
+  elif [[ "$LangCode" = "de" ]]; then
+    LangCode="de-DE"
+  elif [[ "$LangCode" = "es" ]]; then
+    LangCode="es-ES"
+  elif [[ "$LangCode" = "fr" ]]; then
+    LangCode="fr-FR"
+  elif [[ "$LangCode" = "it" ]]; then
+    LangCode="it-IT"
+  else 
+    echo "$MsgErrInvalidLang"
+    exit 1
+  fi
+  OutFile="out.wav"
+  # pico2wave handles long text inputs and 
+  # fixed formatting line-breaks well enough on its own. 
+  # no need to use split_into_paragraphs()
+  pico_synth "$InputText"
+  echo "$MsgInfoPlayback"
+  $Player "$OutFile" > /dev/null 2>&1
+}
+
+cleanup(){
+  pkill -P "$TOP_PID"
+  [[ -n "$TmpDir" && -d "$TmpDir" ]] && rm -r "$TmpDir"
+  [[ -n "$PidFile" && -f "$PidFile" ]] && rm "$PidFile"
+}
+
+############# INSTANCECHECK ##############
+
+check_existing_instance
+
+############## USGCHECKS #################
+
+arg_evaluate_options "$@"
+shift $((OPTIND-1))
+check_environment
+arg_check_input "$@"
+check_connectivity
+
+############### PREPWORK ##################
+
+echo "$TOP_PID" > "$PidFile"
+
+TmpDir="$(mktemp -d "/tmp/${0##*/}.XXXXXX")"
+cd "$TmpDir"
+
+trap "cleanup; exit" EXIT
+
+################ MAIN ####################
+
+set_tts_mode
+set_input_mode
+notify "$MsgInfoSynthesize"
+"$tts_engine"
