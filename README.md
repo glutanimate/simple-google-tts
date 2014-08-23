@@ -68,11 +68,11 @@ Without knowing what license `speak.pl` ships with, I cannot include a modified 
 
 1. Clone this repository:
     
-        git clone 
+        git clone https://github.com/Glutanimate/simple-google-tts.git
 
 2. Download `speak.pl` from [Michal Fapso's gist](https://gist.github.com/michalfapso/3110049) and place it in the same directory as `simple_google_tts`:
 
-        cd 
+        cd simple-google-tts
         git clone https://gist.github.com/3110049.git
         mv 3110049/speak.pl speak.pl && rm -r 3110049
 
