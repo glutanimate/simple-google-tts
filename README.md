@@ -2,17 +2,17 @@
 
 ## Description
 
-This project hosts a bash wrapper for [Michal Fapso's `speak.pl` script](https://gist.github.com/michalfapso/3110049).
+This project hosts a text-to-speech script based on [Michal Fapso's `speak.pl`](http://michalfapso.blogspot.de/2012/01/using-google-text-to-speech.html).
 
-The intention is to provide an easy to use interface to text-to-speech output via Google's speech synthesis system. A fallback option using `pico2wave` automatically provides TTS synthesis in case no Internet connection is found.
+The intention is to provide an easy to use interface to text-to-speech output via Google's speech synthesis system. A fallback interface using `pico2wave` automatically provides TTS synthesis in case no Internet connection is found.
 
-As it stands, the wrapper supports reading from standard input, plain text files and the X selection (highlighted text).
+As it stands, the script supports reading from standard input, plain text files and the X selection (highlighted text).
 
 Please note that `speak.pl` and, in turn, this script use an ["unofficial Google TTS API"](http://weston.ruter.net/2009/12/12/google-tts/), which has several limitations. `simple_google_tts` and `speak.pl` try to work around some of these problems, e.g. "API" requests being limited to 100 characters, but are subject to other restrictions, e.g. obligatory CAPTCHA input for overly frequent requests. As a result, your experience may vary.
 
-## Why use this wrapper?
+## Why use this script?
 
-*Warning: What follows is a technical explanation of the inner workings of `speak.pl` and this wrapper. You don't have to read this to understand how to use this project but it can help shed some light on the issues you might experience.*
+*Warning: What follows is a technical explanation of the inner workings of `speak.pl` and `simple_google_tts`. You don't have to read this to understand how to use this project but it can help shed some light on the issues you might experience.*
 
 Google imposes a 100-character limit on their speech synthesis service that makes it impossible to use their TTS system for anything longer than a short sentence. `speak.pl` works around this limitation by breaking the text input down into appropriate chunks. The chunk cut-offs are set intelligently based on the punctuation and syntax of the input text. Having processed all chunks `speak.pl` then concatenates the speech fragments into one `mp3` file while truncating segments of silence at the start and end of each fragment.
 
@@ -24,7 +24,7 @@ Instead of passing the complete input text to `speak.pl`, `simple_google_tts` fi
 
 `simple_google_tts` also adds automatic playback, more input modes, an offline TTS back end, and several adjustments that make it possible to parse documents with fixed formatting (e.g. [selected text in PDF files](http://superuser.com/a/796341/170160)).
 
-All of this could probably be accomplished a lot more elegantly within the original perl script, but I am not familiar with perl. So I had to make do with bash.
+All of this could probably be accomplished a lot more elegantly within the original perl script, but I am not familiar with perl.
 
 ## Installation and dependencies
 
@@ -36,11 +36,11 @@ The following instructions are provided for Debian/Ubuntu based systems.
 
 You can install all dependencies with the following command:
 
-    sudo apt-get install xsel libnotify-bin libttspico0 libttspico-utils libttspico-data libwww-perl libhtml-tree-perl sox libsox-fmt-mp3
+    sudo apt-get install xsel libnotify-bin libttspico0 libttspico-utils libttspico-data libwww-perl libwww-mechanize-perl libhtml-tree-perl sox libsox-fmt-mp3
 
 A breakdown of the dependencies by component and role:
 
-**Wrapper**
+**simple_google_tts**
 
 `xsel` provides support for parsing the X selection contents
 
@@ -56,35 +56,23 @@ The actual audio playback is handled by `sox`, which is part of `speak.pl`'s dep
 
 Dependencies, as listed in `speak.pl`'s header:
 
-`libwww-perl libhtml-tree-perl sox libsox-fmt-mp3`
+`libwww-perl libwww-mechanize-perl libhtml-tree-perl sox libsox-fmt-mp3`
 
 Perl should be part of your default Debian/Ubuntu installation.
 
 ### Installation
 
-The installation is slightly overcomplicated right now. This is because `simple_google_tts` requires a few modifications to `speak.pl` to work (these are centered around disposal of temporary files).
+1. Install all dependencies
 
-Without knowing what license `speak.pl` ships with, I cannot include a modified copy in this repository. So, for the moment, you will have to apply my patch manually.
-
-1. Clone this repository:
+2. Clone this repository:
     
         git clone https://github.com/Glutanimate/simple-google-tts.git
 
-2. Download `speak.pl` from [Michal Fapso's gist](https://gist.github.com/michalfapso/3110049) and place it in the same directory as `simple_google_tts`:
+3. Navigate to the download directory
 
         cd simple-google-tts
-        git clone https://gist.github.com/3110049.git
-        mv 3110049/speak.pl speak.pl && rm -r 3110049
 
-3. Apply the provided patch to `speak.pl`:
-
-        patch speak.pl < speakpl.patch
-
-4. Make `speak.pl` executable
-
-        chmod +x speak.pl
-
-You should be able to run `simple_google_tts` now. If you wish you can symlink `simple_google_tts` to your `PATH` (e.g. `~/bin` or `/usr/local/bin`) to make it easier to access. 
+You should be able to run `./simple_google_tts` now. If you wish you can symlink `simple_google_tts` to your `PATH` (e.g. `~/bin` or `/usr/local/bin`) to make it easier to access. 
 
 `speak.pl` must always reside in the same directory as `simple_google_tts`.
 
@@ -108,7 +96,7 @@ E.g.:
 
 ### Detailed explanation
 
-`simple_google_tts` can read text from standard input or a text file. The syntax is the same in each case. The wrapper will automatically identify the type of input provided and perform the text to speech synthesis via `speak.pl`.
+`simple_google_tts` can read text from standard input or a text file. The syntax is the same in each case. The script will automatically identify the type of input provided and perform the text to speech synthesis via `speak.pl`.
 
 If no arguments are provided `simple_google_tts` will try to read from the current X selection. This corresponds with the currently highlighted text. Using this functionality you can set up a keyboard shortcut that automatically reads out selected text.
 
@@ -284,7 +272,7 @@ Please note that, out of these, the `pico2wave` back end only supports the follo
 
 ## Known issues
 
-- to prevent simultaneous output the wrapper tries to force only one instance at a time. Unfortunately this fails sometimes, which can be a problem when using the script through a keyboard shortcut
+- to prevent simultaneous output the script tries to force only one instance at a time. Unfortunately this fails sometimes, which can be a problem when using the script through a keyboard shortcut
 
 - there is no easy way to terminate the TTS output if the script is used via a keyboard shortcut. 
   
@@ -296,6 +284,10 @@ Please note that, out of these, the `pico2wave` back end only supports the follo
 
 ## License
 
-Copyright 2014 Glutanimate
+*`speak.pl` copyright 2012 Michal Fapso*
 
-The script and all other project files are licensed under the [GNU GPLv3](http://www.gnu.de/documents/gpl-3.0.en.html). `simple_google_tts` is not endorsed, certified or otherwise approved in any way by Google™.
+*`simple_google_tts` copyright 2014 Glutanimate*
+
+`simple_google_tts` is licensed under the [GNU GPLv3](http://www.gnu.de/documents/gpl-3.0.en.html). For licensing information concerning `speak.pl` please contact [Michal Fapso](https://github.com/michalfapso). 
+
+This project is not endorsed, certified or otherwise approved in any way by Google™.
