@@ -84,14 +84,12 @@ You should be able to run `./simple_google_tts` now. If you wish you can symlink
 
 E.g.:
 
-    $ simple_google_tts -g en "Hello world."
+    $ simple_google_tts en "Hello World"
     Reading from string.
     Using Google for TTS synthesis.
     Synthesizing virtual speech.
-    Processing 1 out of 2 paragraphs
+    Processing 1 out of 1 paragraphs
     Playing synthesized speech 1
-    Processing 2 out of 2 paragraphs
-    Skipping empty paragraph
     All sections processed. Waiting for playback to finish.
 
 ### Detailed explanation

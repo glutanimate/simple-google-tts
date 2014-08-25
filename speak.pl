@@ -4,7 +4,7 @@
 #
 # Copyright 2012 Michal Fapso (https://github.com/michalfapso)
 # 
-#	Modified by Glutanimate (https://github.com/glutanimate)
+# Modified by Glutanimate (https://github.com/glutanimate)
 #
 # Usage:
 # ./speak.pl en input.txt output.mp3
