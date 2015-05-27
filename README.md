@@ -2,29 +2,27 @@
 
 ## Description
 
-This project hosts a text-to-speech script based on [Michal Fapso's `speak.pl`](http://michalfapso.blogspot.de/2012/01/using-google-text-to-speech.html).
+The intention of this project is to provide an easy way to use Google's high quality text-to-speech output on your Linux desktop. Also included in `simple-google-tts` is a fall-back TTS interface that is automatically used when you are offline.
 
-The intention is to provide an easy to use interface to text-to-speech output via Google's speech synthesis system. A fallback interface using `pico2wave` automatically provides TTS synthesis in case no Internet connection is found.
+As it stands the script supports reading from standard input, plain text files, and highlighted text (X.org selection).
 
-As it stands, the script supports reading from standard input, plain text files and the X selection (highlighted text).
-
-Please note that `speak.pl` and, in turn, this script use an ["unofficial Google TTS API"](http://weston.ruter.net/2009/12/12/google-tts/), which has several limitations. `simple_google_tts` and `speak.pl` try to work around some of these problems, e.g. "API" requests being limited to 100 characters, but are subject to other restrictions, e.g. obligatory CAPTCHA input for overly frequent requests. As a result, your experience may vary.
+`simple-google-tts` is based on [`speak.pl` by Michal Fapso](http://michalfapso.blogspot.de/2012/01/using-google-text-to-speech.html). `speak.pl` uses an ["unofficial Google TTS API"](http://weston.ruter.net/2009/12/12/google-tts/) which has several limitations. `simple_google_tts` and `speak.pl` try to work around some of these limitations, e.g. requests being limited to 100 characters, but are subject to other restrictions, e.g. obligatory CAPTCHA input for overly frequent requests. Please keep this in mind when using this project.
 
 ## Why use this script?
 
-*Warning: What follows is a technical explanation of the inner workings of `speak.pl` and `simple_google_tts`. You don't have to read this to understand how to use this project but it can help shed some light on the issues you might experience.*
+*Note: What follows is a technical explanation of the inner workings of `speak.pl` and `simple_google_tts`. You don't have to read this to understand how to use this program, but it can help shed some light on the issues you might experience.*
 
-Google imposes a 100-character limit on their speech synthesis service that makes it impossible to use their TTS system for anything longer than a short sentence. `speak.pl` works around this limitation by breaking the text input down into appropriate chunks. The chunk cut-offs are set intelligently based on the punctuation and syntax of the input text. Having processed all chunks `speak.pl` then concatenates the speech fragments into one `mp3` file while truncating segments of silence at the start and end of each fragment.
+Google imposes a 100-character limit on their speech synthesis service that makes it hard to use their TTS system for anything other than short sentences.
 
-All of these processing steps ensure a relatively natural voice output and minimize the number of clunky pauses caused by the 100-character limitation.
+`speak.pl` works around this limitation by breaking the text input down into appropriate chunks. These chunks are set intelligently based on punctuation and syntax of the text. Having processed all chunks `speak.pl` then concatenates the speech fragments into one audio file while truncating segments of silence at the start and end of each fragment.
 
-However, the main problem with this approach is that the waiting time between user input and voice playback scales linearly with the length of the text. This is where `simple_google_tts` comes in:
+All of these processing steps ensure a relatively natural voice output and minimize the number of clunky pauses caused by the 100-character limitation. The one remaining problem with this approach is that the waiting time between user input and voice playback scales drastically with the length of the text. 
 
-Instead of passing the complete input text to `speak.pl`, `simple_google_tts` first breaks down the input into paragraphs. The paragraphs are then processed one after another with each paragraph being played back while the next one is synthesized. This way any length of text can be parsed with reasonable speed.
+This is where `simple_google_tts` comes in: Instead of passing the text directly to `speak.pl`, `simple_google_tts` first breaks down the input into paragraphs. The paragraphs are then processed one by one with each paragraph being played back while the next one is synthesized. Any length of text can be parsed with reasonable speed in this manner.
 
-`simple_google_tts` also adds automatic playback, more input modes, an offline TTS back end, and several adjustments that make it possible to parse documents with fixed formatting (e.g. [selected text in PDF files](http://superuser.com/a/796341/170160)).
+Additionally, `simple_google_tts` includes automatic playback, more input modes, an offline TTS back-end, and several adjustments that facilitate parsing of documents with fixed formatting (e.g. [selected text in PDF files](http://superuser.com/a/796341/170160)).
 
-All of this could probably be accomplished a lot more elegantly within the original perl script, but I am not familiar with perl.
+All of this could probably be accomplished a lot more elegantly within the original `speak.pl` script, but I am not familiar with perl.
 
 ## Installation and dependencies
 
@@ -48,7 +46,7 @@ A breakdown of the dependencies by component and role:
 `libnotify-bin` is used for GUI notifications
 
 
-`pico2wave` provides the offline speech synthesis back end
+`pico2wave` provides the offline speech synthesis back-end
 
 The actual audio playback is handled by `sox`, which is part of `speak.pl`'s dependencies.
 
@@ -250,7 +248,7 @@ Google's TTS service currently supports the following language codes:
     yo  Yoruba
     zu  Zulu 
 
-Please note that, out of these, the `pico2wave` back end only supports the following languages:
+Please note that, out of these, the `pico2wave` back-end only supports the following languages:
 
     en  English
     de  German
@@ -278,7 +276,7 @@ Please note that, out of these, the `pico2wave` back end only supports the follo
 
     You could probably assign another hotkey to terminate any running instances of the script (e.g. `pkill -9 simple_google_tts`; warning: I have yet to try this out).
 
-- too many requests in too short an amount of time will cause Google to start requesting CAPTCHA input. At this point the Google TTS backend of the script basically becomes useless. Note: I have yet to hit this limit in my regular usage. 
+- too many requests in too short an amount of time will cause Google to start requesting CAPTCHA input. At this point the Google TTS back-end of the script basically becomes useless. Note: I have yet to hit this limit in my regular usage. 
 
 ## License
 

@@ -5,7 +5,7 @@
 # AUTHOR:       (c) 2014 Glutanimate <https://github.com/Glutanimate/>
 # DESCRIPTION:  Wrapper script for Michal Fapso's speak.pl Google TTS script
 # DEPENDENCIES: - wrapper: xsel libttspico0 libttspico-utils libttspico-data libnotify-bin
-#               - speak.pl: libwww-perl libhtml-tree-perl sox libsox-fmt-mp3
+#               - speak.pl: libwww-perl libwww-mechanize-perl libhtml-tree-perl sox libsox-fmt-mp3
 #
 # LICENSE:      GNU GPLv3 (http://www.gnu.de/documents/gpl-3.0.en.html)
 #
