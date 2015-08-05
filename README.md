@@ -1,12 +1,36 @@
 # Simple Google™ TTS
 
+Ever wanted to use Google text-to-speech on Linux? Now you can.
+
+## Table of Contents
+
+<!-- MarkdownTOC -->
+
+- [Description](#description)
+- [Why use this script?](#why-use-this-script)
+- [Installation and dependencies](#installation-and-dependencies)
+    - [Dependencies](#dependencies)
+    - [Installation](#installation)
+- [Usage](#usage)
+    - [General usage](#general-usage)
+    - [Detailed explanation](#detailed-explanation)
+    - [Options](#options)
+    - [Supported languages](#supported-languages)
+    - [More examples](#more-examples)
+- [Known issues](#known-issues)
+- [Similar projects](#similar-projects)
+- [License](#license)
+
+<!-- /MarkdownTOC -->
+
+
 ## Description
 
-The intention of this project is to provide an easy way to use Google's high quality text-to-speech output on your Linux desktop. Also included in `simple-google-tts` is a fall-back TTS interface that is automatically used when you are offline.
+The intent of this project is to provide an easy way to use text-to-speech output by Google on your Linux desktop. The script supports reading from standard input, plain text files, and highlighted text. A fall-back interface based on `pico2wave` takes care of the TTS output when you are offline. 
 
-As it stands the script supports reading from standard input, plain text files, and highlighted text (X.org selection).
+----
 
-`simple-google-tts` is based on [`speak.pl` by Michal Fapso](http://michalfapso.blogspot.de/2012/01/using-google-text-to-speech.html). `speak.pl` uses an ["unofficial Google TTS API"](http://weston.ruter.net/2009/12/12/google-tts/) which has several limitations. `simple_google_tts` and `speak.pl` try to work around some of these limitations, e.g. requests being limited to 100 characters, but are subject to other restrictions, e.g. obligatory CAPTCHA input for overly frequent requests. Please keep this in mind when using this project.
+`simple-google-tts` is based on [`speak.pl` by Michal Fapso](http://michalfapso.blogspot.de/2012/01/using-google-text-to-speech.html) which uses an [unofficial Google TTS API](http://weston.ruter.net/2009/12/12/google-tts/). This results in several limitations. `simple_google_tts` and `speak.pl` try to work around some of these issues, e.g. requests being limited to 100 characters, but are subject to other restrictions, e.g. obligatory CAPTCHA input for overly frequent requests. Please keep this in mind when using this project.
 
 ## Why use this script?
 
@@ -22,7 +46,7 @@ This is where `simple_google_tts` comes in: Instead of passing the text directly
 
 Additionally, `simple_google_tts` includes automatic playback, more input modes, an offline TTS back-end, and several adjustments that facilitate parsing of documents with fixed formatting (e.g. [selected text in PDF files](http://superuser.com/a/796341/170160)).
 
-All of this could probably be accomplished a lot more elegantly within the original `speak.pl` script, but I am not familiar with perl.
+All of this could have probably been accomplished a lot more elegantly within the original `speak.pl` script, but I am not familiar with perl.
 
 ## Installation and dependencies
 
@@ -276,7 +300,12 @@ Please note that, out of these, the `pico2wave` back-end only supports the follo
 
     You could probably assign another hotkey to terminate any running instances of the script (e.g. `pkill -9 simple_google_tts`; warning: I have yet to try this out).
 
-- too many requests in too short an amount of time will cause Google to start requesting CAPTCHA input. At this point the Google TTS back-end of the script basically becomes useless. Note: I have yet to hit this limit in my regular usage. 
+- too many requests too quickly will cause Google to start requesting CAPTCHA input. I have yet to hit this limit in my regular use of the script. 
+
+## Similar projects
+
+- [desbma/GoogleSpeech](https://github.com/desbma/GoogleSpeech)
+- [mattdy/googletts](https://github.com/mattdy/googletts)
 
 ## License
 
