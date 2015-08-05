@@ -197,7 +197,7 @@ my $mech = WWW::Mechanize->new(autocheck => 0, cookie_jar => $cookie_jar);
 $mech->agent_alias( 'Windows IE 6' );
 $mech->add_header( "Connection" => "keep-alive" );
 $mech->add_header( "Accept" => "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-$mech->add_header( "Accept-Language" => "sk,cs;q=0.8,en-us;q=0.5,en;q=0.3");
+$mech->add_header( "Accept-Language" => "en-us;q=0.5,en;q=0.3");
 
 my $browser = LWP::UserAgent->new;
 
@@ -354,7 +354,7 @@ sub SentenceToMp3() {
 sub GetSentenceResponse() {
 	my $sentence = shift;
 	#my $resp = $browser->get("http://translate.google.com/translate_tts?tl=$language&q=$sentence", @headers);
-	my $resp = $browser->get("http://translate.google.com/translate_tts?tl=$language&q=$sentence");
+	my $resp = $browser->get("http://translate.google.com/translate_tts?tl=$language&q=$sentence&total=1&idx=0&client=t");
 
 	if ($resp->content =~ "^<!DOCTYPE" ||
 		$resp->content =~ "^<html>") 
@@ -368,12 +368,12 @@ sub GetSentenceResponse_CaptchaAware() {
 	my $sentence = shift;
 
 	my $recaptcha_waiting = 0;
-	print "URL: http://translate.google.com/translate_tts?tl=$language&q=$sentence\n";
+	print "URL: http://translate.google.com/translate_tts?tl=$language&q=$sentence&total=1&idx=0&client=t\n";
 	while (1) {
 		#$resp = $browser->get("http://translate.google.com/translate_tts?tl=$language&q=$sentence", @headers);
 		#print $resp->content;
 		#$mech->get("http://translate.google.com/translate_tts?tl=$language&q=$sentence", @headers);
-		my $url = "http://translate.google.com/translate_tts?tl=$language&q=$sentence";
+		my $url = "http://translate.google.com/translate_tts?tl=$language&q=$sentence&total=1&idx=0&client=t";
 		$mech->get($url); $mech->add_header( Referer => "$referer" ); $referer = $url;
 #		print "Headers:\n".Dumper($mech->dump_headers());
 #		open my $fh, '<', "recaptcha_response.html" or die "error opening file: $!";
