@@ -354,7 +354,7 @@ sub SentenceToMp3() {
 sub GetSentenceResponse() {
 	my $sentence = shift;
 	#my $resp = $browser->get("http://translate.google.com/translate_tts?tl=$language&q=$sentence", @headers);
-	my $resp = $browser->get("http://translate.google.com/translate_tts?tl=$language&q=$sentence&total=1&idx=0&client=t");
+	my $resp = $browser->get("http://translate.google.com/translate_tts?tl=$language&q=$sentence&total=1&idx=0&client=simple-tts");
 
 	if ($resp->content =~ "^<!DOCTYPE" ||
 		$resp->content =~ "^<html>") 
@@ -368,12 +368,12 @@ sub GetSentenceResponse_CaptchaAware() {
 	my $sentence = shift;
 
 	my $recaptcha_waiting = 0;
-	print "URL: http://translate.google.com/translate_tts?tl=$language&q=$sentence&total=1&idx=0&client=t\n";
+	print "URL: http://translate.google.com/translate_tts?tl=$language&q=$sentence&total=1&idx=0&client=simple-tts\n";
 	while (1) {
 		#$resp = $browser->get("http://translate.google.com/translate_tts?tl=$language&q=$sentence", @headers);
 		#print $resp->content;
 		#$mech->get("http://translate.google.com/translate_tts?tl=$language&q=$sentence", @headers);
-		my $url = "http://translate.google.com/translate_tts?tl=$language&q=$sentence&total=1&idx=0&client=t";
+		my $url = "http://translate.google.com/translate_tts?tl=$language&q=$sentence&total=1&idx=0&client=simple-tts";
 		$mech->get($url); $mech->add_header( Referer => "$referer" ); $referer = $url;
 #		print "Headers:\n".Dumper($mech->dump_headers());
 #		open my $fh, '<', "recaptcha_response.html" or die "error opening file: $!";
