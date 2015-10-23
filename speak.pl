@@ -190,8 +190,6 @@ my @headers = (
 );
 
 my $cookie_jar = HTTP::Cookies->new(hide_cookie2 => 1);
-#$cookie_jar->clear();
-#$cookie_jar->set_cookie(undef, "SESSIONID", $sessionid, "/", $domain, undef, 1, 0, undef, 1);
 
 my $mech = WWW::Mechanize->new(autocheck => 0, cookie_jar => $cookie_jar);
 $mech->agent_alias( 'Windows IE 6' );
@@ -335,10 +333,7 @@ sub SentenceToMp3() {
 	}
 	
 	my $mp3_out = sprintf("$TMP_DIR/%04d.mp3", $sentence_idx);
-	#print "mp3_out: $mp3_out\n";
-	#print "http://translate.google.com/translate_tts?q=$sentence\n";
 
-#	my $resp = GetSentenceResponse($sentence);
 	my $resp = GetSentenceResponse_CaptchaAware($sentence); # NOT WORKING YET
 
 	if (length($resp) == 0) {
@@ -353,7 +348,6 @@ sub SentenceToMp3() {
 
 sub GetSentenceResponse() {
 	my $sentence = shift;
-	#my $resp = $browser->get("http://translate.google.com/translate_tts?tl=$language&q=$sentence", @headers);
 	my $amptk = int(rand(1000000)) . '|' . int(rand(1000000));
 	my $resp = $browser->get("http://translate.google.com/translate_tts?ie=UTF-8&tl=$language&q=$sentence&total=1&idx=0&client=t&tk=$amptk");
 
@@ -371,15 +365,9 @@ sub GetSentenceResponse_CaptchaAware() {
 	my $recaptcha_waiting = 0;
 	print "URL: http://translate.google.com/translate_tts?ie=UTF-8&tl=$language&q=$sentence&total=1&idx=0&client=t\n";
 	while (1) {
-		#$resp = $browser->get("http://translate.google.com/translate_tts?tl=$language&q=$sentence", @headers);
-		#print $resp->content;
-		#$mech->get("http://translate.google.com/translate_tts?tl=$language&q=$sentence", @headers);
 		my $amptk = int(rand(1000000)) . '|' . int(rand(1000000));
 		my $url = "http://translate.google.com/translate_tts?ie=UTF-8&tl=$language&q=$sentence&total=1&idx=0&client=t&tk=$amptk";
 		$mech->get($url); $mech->add_header( Referer => "$referer" ); $referer = $url;
-#		print "Headers:\n".Dumper($mech->dump_headers());
-#		open my $fh, '<', "recaptcha_response.html" or die "error opening file: $!";
-#		$resp = do { local $/; <$fh> };
 		if ($mech->response()->content() =~ /^<!DOCTYPE/ || 
 			$mech->response()->content() =~ /^<html>/) 
 		{
