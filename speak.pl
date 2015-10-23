@@ -180,7 +180,7 @@ my $silence_duration_words      = 0.05;
 
 my @headers = (
 'Host' => 'translate.google.com',
-'User-Agent' => 'Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.1.5) Gecko/20091109 Ubuntu/9.10 (karmic) Firefox/3.5.5',
+'User-Agent' => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.71 Safari/537.36',
 'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
 'Accept-Language' => 'en-us,en;q=0.5',
 'Accept-Encoding' => 'gzip,deflate',
@@ -354,7 +354,8 @@ sub SentenceToMp3() {
 sub GetSentenceResponse() {
 	my $sentence = shift;
 	#my $resp = $browser->get("http://translate.google.com/translate_tts?tl=$language&q=$sentence", @headers);
-	my $resp = $browser->get("http://translate.google.com/translate_tts?tl=$language&q=$sentence&total=1&idx=0&client=simple-tts");
+	my $amptk = int(rand(1000000)) . '|' . int(rand(1000000));
+	my $resp = $browser->get("http://translate.google.com/translate_tts?ie=UTF-8&tl=$language&q=$sentence&total=1&idx=0&client=t&tk=$amptk");
 
 	if ($resp->content =~ "^<!DOCTYPE" ||
 		$resp->content =~ "^<html>") 
@@ -368,12 +369,13 @@ sub GetSentenceResponse_CaptchaAware() {
 	my $sentence = shift;
 
 	my $recaptcha_waiting = 0;
-	print "URL: http://translate.google.com/translate_tts?tl=$language&q=$sentence&total=1&idx=0&client=simple-tts\n";
+	print "URL: http://translate.google.com/translate_tts?ie=UTF-8&tl=$language&q=$sentence&total=1&idx=0&client=t\n";
 	while (1) {
 		#$resp = $browser->get("http://translate.google.com/translate_tts?tl=$language&q=$sentence", @headers);
 		#print $resp->content;
 		#$mech->get("http://translate.google.com/translate_tts?tl=$language&q=$sentence", @headers);
-		my $url = "http://translate.google.com/translate_tts?tl=$language&q=$sentence&total=1&idx=0&client=simple-tts";
+		my $amptk = int(rand(1000000)) . '|' . int(rand(1000000));
+		my $url = "http://translate.google.com/translate_tts?ie=UTF-8&tl=$language&q=$sentence&total=1&idx=0&client=t&tk=$amptk";
 		$mech->get($url); $mech->add_header( Referer => "$referer" ); $referer = $url;
 #		print "Headers:\n".Dumper($mech->dump_headers());
 #		open my $fh, '<', "recaptcha_response.html" or die "error opening file: $!";
