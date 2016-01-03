@@ -2,6 +2,10 @@
 
 Ever wanted to use Google text-to-speech on Linux? Now you can.
 
+## Status update
+
+**The unofficial Google TTS API has undergone a change that makes it more or less impossible to use outside the official web interface. As a result this tool and others have stopped working** (#7).
+
 ## Table of Contents
 
 <!-- MarkdownTOC -->
@@ -22,7 +26,6 @@ Ever wanted to use Google text-to-speech on Linux? Now you can.
 - [License](#license)
 
 <!-- /MarkdownTOC -->
-
 
 ## Description
 
