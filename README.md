@@ -1,10 +1,16 @@
+## Status update
+
+**This project is currently unmaintained and will remain so for the foreseeable future**. 
+
+This script and many others like it rely on an unofficial API that has recently become increasingly difficult to support. As Google continues to lock down access to their TTS interface I see no choice other than to suspend maintaining this script for the time being. I sincerely hope that the future will see an official way to use Google TTS on desktop Linux. Until then, please feel free to fork this project if you want to try to fix it.
+
+As a last note: Make sure to also check out the [secion on similar projects](#similar-projects) provided in this README.
+
+----------------------------
+
 # Simple Google™ TTS
 
 Ever wanted to use Google text-to-speech on Linux? Now you can.
-
-## Status update
-
-**The unofficial Google TTS API has undergone a change that makes it more or less impossible to use outside the official web interface. As a result this tool and others have stopped working** (#7).
 
 ## Table of Contents
 
@@ -308,7 +314,7 @@ Please note that, out of these, the `pico2wave` back-end only supports the follo
 ## Similar projects
 
 - [desbma/GoogleSpeech](https://github.com/desbma/GoogleSpeech)
-- [mattdy/googletts](https://github.com/mattdy/googletts)
+- [pndurette/gTTS](https://github.com/pndurette/gTTS)
 
 ## License
 
