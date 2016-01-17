@@ -4,7 +4,7 @@
 
 This script and many others like it rely on an unofficial API that has recently become increasingly difficult to support. As Google continues to lock down access to their TTS interface I see no choice other than to suspend maintaining this script for the time being. I sincerely hope that the future will see an official way to use Google TTS on desktop Linux. Until then, please feel free to fork this project if you want to try to fix it.
 
-As a last note: Make sure to also check out the [secion on similar projects](#similar-projects) provided in this README.
+As a last note: Make sure to also check out the [section on similar projects](#similar-projects) provided in this README.
 
 ----------------------------
 
