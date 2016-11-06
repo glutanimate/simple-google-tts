@@ -349,7 +349,7 @@ sub SentenceToMp3() {
 sub GetSentenceResponse() {
 	my $sentence = shift;
 	my $amptk = int(rand(1000000)) . '|' . int(rand(1000000));
-	my $resp = $browser->get("https://translate.google.com/translate_tts?ie=UTF-8&tl=$language&q=$sentence&total=1&idx=0&client=t&tk=$amptk");
+	my $resp = $browser->get("https://translate.google.com/translate_tts?ie=UTF-8&tl=$language&q=$sentence&total=1&idx=0&client=tw-ob&tk=$amptk");
 
 	if ($resp->content =~ "^<!DOCTYPE" ||
 		$resp->content =~ "^<html>") 
@@ -363,10 +363,10 @@ sub GetSentenceResponse_CaptchaAware() {
 	my $sentence = shift;
 
 	my $recaptcha_waiting = 0;
-	print "URL: https://translate.google.com/translate_tts?ie=UTF-8&tl=$language&q=$sentence&total=1&idx=0&client=t\n";
+	print "URL: https://translate.google.com/translate_tts?ie=UTF-8&tl=$language&q=$sentence&total=1&idx=0&client=tw-ob\n";
 	while (1) {
 		my $amptk = int(rand(1000000)) . '|' . int(rand(1000000));
-		my $url = "https://translate.google.com/translate_tts?ie=UTF-8&tl=$language&q=$sentence&total=1&idx=0&client=t&tk=$amptk";
+		my $url = "https://translate.google.com/translate_tts?ie=UTF-8&tl=$language&q=$sentence&total=1&idx=0&client=tw-ob&tk=$amptk";
 		$mech->get($url); $mech->add_header( Referer => "$referer" ); $referer = $url;
 		if ($mech->response()->content() =~ /^<!DOCTYPE/ || 
 			$mech->response()->content() =~ /^<html>/) 
